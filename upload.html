@@ -2,44 +2,43 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>رفع تلقائي...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تم الرفع</title>
     <style>
-        body { font-family: Tahoma; text-align: center; padding: 50px; background: #f0f7ff; }
-        .box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
-        .success { color: #2ecc71; }
-        .error { color: #e74c3c; }
+        body { font-family: Tahoma; background: #e8f5e9; text-align: center; padding: 60px; }
+        .box { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; }
+        .success { color: #27ae60; font-size: 1.5rem; font-weight: bold; }
+        .icon { font-size: 60px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 <div class="box">
-    <h2>جاري رفع التقرير...</h2>
-    <p id="status">تحليل البيانات...</p>
-    <div id="result"></div>
+    <div class="icon">✓</div>
+    <div class="success">تم الرفع بنجاح!</div>
+    <p style="margin-top:20px; color:#555;">التقرير وصل إلى لوحة الأدمن</p>
 </div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
 const data = params.get('data');
-if (!data) {
-    document.getElementById('status').innerHTML = '<span class="error">لا توجد بيانات!</span>';
-} else {
-    document.getElementById('status').textContent = 'فك التشفير...';
-    setTimeout(() => {
-        const content = atob(data);
-        const blob = new Blob([content], { type: 'text/plain' });
-        const form = new FormData();
-        form.append('file', blob, `report_${Date.now()}.txt`);
 
-        // محاكاة رفع (استبدل بـ API حقيقي لاحقًا)
-        setTimeout(() => {
-            const fakeUrl = window.location.href.replace('upload', 'reports/report_' + Date.now() + '.txt');
-            document.getElementById('result').innerHTML = `
-                <p class="success"><strong>تم الرفع!</strong></p>
-                <p><a href="${fakeUrl}" target="_blank">فتح التقرير</a></p>
-                <p>انسخ الرابط: <code>${fakeUrl}</code></p>
-            `;
-        }, 1500);
-    }, 500);
+if (data) {
+    try {
+        const decoded = atob(data);
+        const id = 'report_' + Date.now();
+        const reportObj = { id, content: decoded, timestamp: new Date().toISOString() };
+        
+        // حفظ في localStorage (مشترك بين الصفحات)
+        let reports = JSON.parse(localStorage.getItem('security_reports') || '[]');
+        reports.unshift(reportObj);
+        localStorage.setItem('security_reports', JSON.stringify(reports));
+        
+        // إشعار الأدمن (إذا كان مفتوح)
+        if (window.BroadcastChannel) {
+            const channel = new BroadcastChannel('report_channel');
+            channel.postMessage({ type: 'new_report', report: reportObj });
+        }
+    } catch (e) {}
 }
 </script>
 </body>
