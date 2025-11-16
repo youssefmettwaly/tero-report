@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>رفع تلقائي...</title>
+    <style>
+        body { font-family: Tahoma; text-align: center; padding: 50px; background: #f0f7ff; }
+        .box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+        .success { color: #2ecc71; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>جاري رفع التقرير...</h2>
+    <p id="status">تحليل البيانات...</p>
+    <div id="result"></div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const data = params.get('data');
+if (!data) {
+    document.getElementById('status').innerHTML = '<span class="error">لا توجد بيانات!</span>';
+} else {
+    document.getElementById('status').textContent = 'فك التشفير...';
+    setTimeout(() => {
+        const content = atob(data);
+        const blob = new Blob([content], { type: 'text/plain' });
+        const form = new FormData();
+        form.append('file', blob, `report_${Date.now()}.txt`);
+
+        // محاكاة رفع (استبدل بـ API حقيقي لاحقًا)
+        setTimeout(() => {
+            const fakeUrl = window.location.href.replace('upload', 'reports/report_' + Date.now() + '.txt');
+            document.getElementById('result').innerHTML = `
+                <p class="success"><strong>تم الرفع!</strong></p>
+                <p><a href="${fakeUrl}" target="_blank">فتح التقرير</a></p>
+                <p>انسخ الرابط: <code>${fakeUrl}</code></p>
+            `;
+        }, 1500);
+    }, 500);
+}
+</script>
+</body>
+</html>

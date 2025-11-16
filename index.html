@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الأدمن - تقارير الأمان</title>
+    <style>
+        :root { --p: #1a5fb4; --s: #2ecc71; --d: #e74c3c; --dark: #2c3e50; --light: #f8f9fa; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#f4f6f9; color:#333; line-height:1.6; }
+        .container { max-width:1000px; margin:0 auto; padding:20px; }
+        header { text-align:center; margin:30px 0; }
+        .logo { width:90px; height:90px; background:var(--p); color:white; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; }
+        h1 { color:var(--p); font-size:2rem; }
+        .card { background:white; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.1); margin:20px 0; overflow:hidden; }
+        .card-header { background:var(--p); color:white; padding:15px; text-align:center; font-size:1.3rem; }
+        .card-body { padding:25px; }
+        .btn { padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:600; margin:5px; text-decoration:none; display:inline-block; }
+        .btn-p { background:var(--p); color:white; }
+        .btn-d { background:var(--d); color:white; }
+        .btn:hover { opacity:0.9; transform:scale(1.02); }
+        .report-item { padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+        .report-name { font-weight:600; }
+        .report-meta { font-size:0.85rem; color:#777; }
+        .footer { text-align:center; padding:30px; color:#777; font-size:0.9rem; }
+        .login-form { max-width:400px; margin:0 auto; }
+        input { width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px; }
+        .alert-s { background:#d4edda; color:#155724; border:1px solid #c3e6cb; padding:15px; border-radius:8px; margin:15px 0; }
+        .hidden { display:none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="logo">IT</div>
+        <h1>لوحة تحكم الأدمن</h1>
+    </header>
+
+    <!-- تسجيل الدخول -->
+    <div id="loginSection">
+        <div class="card">
+            <div class="card-header">تسجيل الدخول</div>
+            <div class="card-body">
+                <div class="login-form">
+                    <input type="text" id="username" placeholder="اسم المستخدم" value="meto">
+                    <input type="password" id="password" placeholder="كلمة المرور" value="511970">
+                    <button class="btn btn-p" onclick="login()">دخول</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة الأدمن -->
+    <div id="adminPanel" class="hidden">
+        <div class="card">
+            <div class="card-header">
+                التقارير المرفوعة
+                <button class="btn btn-d" style="float:left;" onclick="logout()">خروج</button>
+            </div>
+            <div class="card-body">
+                <div id="reportsList">جاري تحميل التقارير...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2025 IT Security Egypt • متاح للاستخدام الداخلي فقط
+    </div>
+</div>
+
+<script>
+const API_URL = "https://your-domain.com/api";  // غيّر بـ رابطك الحقيقي
+
+// تسجيل الدخول
+function login() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    if (u === 'meto' && p === '511970') {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        loadReports();
+    } else {
+        alert('خطأ في اسم المستخدم أو كلمة المرور');
+    }
+}
+
+// تسجيل الخروج
+function logout() {
+    document.getElementById('adminPanel').classList.add('hidden');
+    document.getElementById('loginSection').classList.remove('hidden');
+    document.getElementById('username').value = 'meto';
+    document.getElementById('password').value = '511970';
+}
+
+// تحميل التقارير (محاكاة – أضف API حقيقي)
+function loadReports() {
+    // محاكاة بيانات (استبدل بـ fetch حقيقي)
+    const mockReports = [
+        { id: '1', name: 'PC-001_2025-11-16.txt', date: '2025-11-16 16:30', size: '45 KB' },
+        { id: '2', name: 'LAPTOP-002_2025-11-16.txt', date: '2025-11-16 15:20', size: '38 KB' }
+    ];
+    if (mockReports.length === 0) {
+        document.getElementById('reportsList').innerHTML = '<p style="text-align:center;color:#777;">لا توجد تقارير بعد</p>';
+        return;
+    }
+    document.getElementById('reportsList').innerHTML = mockReports.map(r => `
+        <div class="report-item">
+            <div>
+                <div class="report-name">${r.name}</div>
+                <div class="report-meta">${r.date} • ${r.size}</div>
+            </div>
+            <div>
+                <a href="#" class="btn btn-p" style="padding:8px 15px;font-size:0.9rem;">عرض</a>
+                <button class="btn btn-d" style="padding:8px 15px;font-size:0.9rem;" onclick="deleteReport('${r.id}')">حذف</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// حذف تقرير (محاكاة)
+function deleteReport(id) {
+    if (confirm('هل أنت متأكد؟')) {
+        alert('تم الحذف');
+        loadReports();
+    }
+}
+</script>
+</body>
+</html>
