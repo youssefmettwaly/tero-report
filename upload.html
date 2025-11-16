@@ -1,46 +1,48 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تم الرفع</title>
-    <style>
-        body { font-family: Tahoma; background: #e8f5e9; text-align: center; padding: 60px; }
-        .box { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; }
-        .success { color: #27ae60; font-size: 1.5rem; font-weight: bold; }
-        .icon { font-size: 60px; margin-bottom: 20px; }
-    </style>
+  <title>Upload Complete</title>
+  <style>
+    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:60px;}
+    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:500px;margin:0 auto;}
+    h2{color:#e74c3c;}
+  </style>
 </head>
 <body>
 <div class="box">
-    <div class="icon">✓</div>
-    <div class="success">تم الرفع بنجاح!</div>
-    <p style="margin-top:20px; color:#555;">التقرير وصل إلى المستر </p>
+  <h2>Upload Complete!</h2>
+  <p>Report sent to Admin Panel.</p>
+  <p><a href="https://youssefmettwaly.github.io/tero-report/admin.html" style="color:#0f0;">Go to Admin Panel</a></p>
 </div>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const data = params.get('data');
+// === الـ Token مخفي هنا فقط ===
+const GITHUB_TOKEN = "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";
+const REPO = "youssefmettwaly/tero-report";
+const API_URL = `https://api.github.com/repos/${REPO}/contents/reports`;
 
+// استقبال التقرير من البرنامج
+const params = new URLSearchParams(location.search);
+const data = params.get('data');
 if (data) {
-    try {
-        const decoded = atob(data);
-        const id = 'report_' + Date.now();
-        const reportObj = { id, content: decoded, timestamp: new Date().toISOString() };
-        
-        // حفظ في localStorage (مشترك بين الصفحات)
-        let reports = JSON.parse(localStorage.getItem('security_reports') || '[]');
-        reports.unshift(reportObj);
-        localStorage.setItem('security_reports', JSON.stringify(reports));
-        
-        // إشعار الأدمن (إذا كان مفتوح)
-        if (window.BroadcastChannel) {
-            const channel = new BroadcastChannel('report_channel');
-            channel.postMessage({ type: 'new_report', report: reportObj });
-        }
-    } catch (e) {}
+  try {
+    const content = atob(data);
+    const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${navigator.userAgent.slice(0,15)}.txt`;
+
+    fetch(`${API_URL}/${filename}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'New hack report',
+        content: btoa(content),
+        branch: 'main'
+      })
+    });
+  } catch(e) {}
 }
 </script>
 </body>
 </html>
-
