@@ -8,7 +8,7 @@
     :root{--p:#e74c3c;--s:#27ae60;--d:#c0392b;--bg:#1a1a1a;--card:#2d2d2d;--text:#f0f0f0;}
     *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Tahoma,sans-serif;}
     body{background:var(--bg);color:var(--text);min-height:100vh;}
-    
+   
     /* === Top Bar === */
     .topbar{
       background:var(--p);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;
@@ -18,7 +18,6 @@
     .auth-btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;
       background:white;color:var(--p);transition:0.3s;}
     .auth-btn:hover{transform:scale(1.05);background:#f0f0f0;}
-
     /* === Login Page === */
     .login-container{
       display:flex;justify-content:center;align-items:center;min-height:90vh;
@@ -34,8 +33,7 @@
     .login-btn{width:100%;padding:14px;background:var(--p);color:white;border:none;
       border-radius:10px;font-weight:bold;cursor:pointer;margin-top:10px;transition:0.3s;}
     .login-btn:hover{background:#c0392b;}
-    .error{color:#ff6b6b;margin-top:10px;font-size:0.9rem;}
-
+    .error{color:#ff6 Boston6b;margin-top:10px;font-size:0.9rem;}
     /* === Dashboard === */
     .container{max-width:1100px;margin:20px auto;padding:0 20px;}
     .card{background:var(--card);border-radius:12px;overflow:hidden;
@@ -55,7 +53,6 @@
     .btn-view{background:var(--s);color:white;}
     .btn-delete{background:var(--d);color:white;}
     .btn-sm:hover{opacity:0.9;}
-
     /* === Modal === */
     .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
       background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:2000;}
@@ -67,14 +64,12 @@
       border-radius:8px;color:#0f0;margin:15px 0;max-height:60vh;overflow:auto;}
     .download-btn{margin-top:15px;background:var(--s);color:white;padding:10px 20px;
       border:none;border-radius:8px;cursor:pointer;font-weight:bold;}
-
     .hidden{display:none !important;}
     .footer{text-align:center;padding:30px;color:#666;font-size:0.9rem;}
   </style>
 </head>
 <body>
-
-<!-- === Top Bar (Always Visible) === -->
+<!-- === Top Bar === -->
 <div class="topbar">
   <div class="site-name">tero hack report</div>
   <button id="authButton" class="auth-btn" onclick="toggleAuth()">Login</button>
@@ -91,12 +86,12 @@
   </div>
 </div>
 
-<!-- === Dashboard (Hidden Initially) === -->
+<!-- === Dashboard === -->
 <div id="dashboard" class="container hidden">
   <div class="card">
     <div class="card-header">Uploaded Hack Reports</div>
     <div class="card-body">
-      <div id="reportsList">Loading reports...</div>
+      <div id="reportsList">Loading reports from server...</div>
     </div>
   </div>
   <div class="footer">© 2025 tero hack report • Internal IT Use Only</div>
@@ -115,26 +110,22 @@
 <script>
 const USER = "meto";
 const PASS = "511970";
-let reports = [];
 
-// === Toggle Auth Button ===
+// === Auth Functions ===
 function toggleAuth() {
   const isLoggedIn = !document.getElementById('dashboard').classList.contains('hidden');
-  if (isLoggedIn) {
-    logout();
-  } else {
+  if (isLoggedIn) logout();
+  else {
     document.getElementById('loginPage').style.display = 'flex';
     document.getElementById('dashboard').classList.add('hidden');
     document.getElementById('authButton').textContent = 'Login';
   }
 }
 
-// === Login ===
 function login() {
   const u = document.getElementById('username').value.trim();
   const p = document.getElementById('password').value;
   const err = document.getElementById('errorMsg');
-
   if (u === USER && p === PASS) {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('dashboard').classList.remove('hidden');
@@ -145,75 +136,86 @@ function login() {
   }
 }
 
-// === Logout ===
 function logout() {
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('loginPage').style.display = 'flex';
   document.getElementById('authButton').textContent = 'Login';
-  document.getElementById('username').value = 'meto';
-  document.getElementById('password').value = '511970';
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
   document.getElementById('errorMsg').textContent = '';
 }
 
-// === Load Reports ===
-function loadReports() {
-  reports = JSON.parse(localStorage.getItem('security_reports') || '[]');
+// === Load Reports from GitHub ===
+async function loadReports() {
   const list = document.getElementById('reportsList');
-  if (reports.length === 0) {
-    list.innerHTML = '<p style="text-align:center;color:#aaa;">No hack reports uploaded yet</p>';
-    return;
+  try {
+    const res = await fetch('https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports');
+    const files = await res.json();
+    if (!Array.isArray(files) || files.length === 0) {
+      list.innerHTML = '<p style="text-align:center;color:#aaa;">No hack reports uploaded yet</p>';
+      return;
+    }
+
+    files.sort((a, b) => b.name.localeCompare(a.name));
+
+    list.innerHTML = files.map((file, i) => `
+      <div class="report-item">
+        <div>
+          <div class="report-name">${file.name}</div>
+          <div class="report-meta">Uploaded: ${new Date().toLocaleString('en-EG')}</div>
+        </div>
+        <div>
+          <button class="btn-sm btn-view" onclick="viewReport('${file.download_url}')">View</button>
+          <a href="${file.download_url}" download class="btn-sm" style="background:#27ae60;color:white;">Download</a>
+          <button class="btn-sm btn-delete" onclick="deleteReport('${file.name}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = '<p style="color:#ff6b6b;text-align:center;">Failed to load reports</p>';
   }
-  list.innerHTML = reports.map((r, i) => `
-    <div class="report-item">
-      <div>
-        <div class="report-name">Hack Report #${reports.length - i}</div>
-        <div class="report-meta">${new Date(r.timestamp).toLocaleString('en-EG')}</div>
-      </div>
-      <div>
-        <button class="btn-sm btn-view" onclick="view('${r.id}')">View</button>
-        <button class="btn-sm btn-delete" onclick="del('${r.id}')">Delete</button>
-      </div>
-    </div>
-  `).join('');
 }
 
-// === View, Download, Delete ===
-function view(id) {
-  const r = reports.find(x => x.id === id);
-  document.getElementById('modalTitle').textContent = `Hack Report #${reports.indexOf(r) + 1}`;
-  document.getElementById('modalContent').textContent = r.content;
-  document.getElementById('modal').style.display = 'flex';
-  window.current = r;
-}
-function downloadReport() {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([window.current.content], {type:'text/plain'}));
-  a.download = `hack_report_${new Date(window.current.timestamp).toISOString().slice(0,19).replace(/:/g,'-')}.txt`;
-  a.click();
-}
-function del(id) {
-  if (confirm('Delete this hack report permanently?')) {
-    reports = reports.filter(x => x.id !== id);
-    localStorage.setItem('security_reports', JSON.stringify(reports));
-    loadReports();
+// === View Report ===
+async function viewReport(url) {
+  try {
+    const res = await fetch(url);
+    const content = await res.text();
+    document.getElementById('modalTitle').textContent = url.split('/').pop();
+    document.getElementById('modalContent').textContent = content;
+    document.getElementById('modal').style.display = 'flex';
+    window.currentContent = content;
+    window.currentFile = url.split('/').pop();
+  } catch (e) {
+    alert("Failed to load report");
   }
 }
+
+// === Download Report ===
+function downloadReport() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([window.currentContent], {type: 'text/plain'}));
+  a.download = window.currentFile;
+  a.click();
+}
+
+// === Delete Report (via upload.html proxy) ===
+function deleteReport(filename) {
+  if (!confirm(`Delete ${filename} permanently?`)) return;
+  const proxyUrl = `https://youssefmettwaly.github.io/tero-report/upload.html?delete=${encodeURIComponent(filename)}`;
+  fetch(proxyUrl).then(() => loadReports()).catch(() => alert("Delete failed"));
+}
+
 function closeModal() {
   document.getElementById('modal').style.display = 'none';
 }
 
-// === Auto Refresh + New Report Listener ===
+// === Auto Refresh ===
 setInterval(() => {
   if (!document.getElementById('dashboard').classList.contains('hidden')) loadReports();
-}, 5000);
+}, 10000);
 
-if (window.BroadcastChannel) {
-  new BroadcastChannel('report_channel').onmessage = () => {
-    if (!document.getElementById('dashboard').classList.contains('hidden')) loadReports();
-  };
-}
-
-// === On Load: Show Login ===
+// === On Load ===
 window.onload = () => {
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('loginPage').style.display = 'flex';
@@ -222,4 +224,3 @@ window.onload = () => {
 </script>
 </body>
 </html>
-
