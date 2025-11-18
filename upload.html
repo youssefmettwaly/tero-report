@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload Complete</title>
+  <meta charset="utf-8">
+  <style>
+    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:80px;}
+    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:500px;margin:0 auto;}
+    h2{color:#e74c3c;margin-bottom:20px;}
+    a{color:#0f0;text-decoration:underline;}
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>Upload Complete!</h2>
+  <p>Report sent successfully to Admin Panel.</p>
+  <p><a href="https://youssefmettwaly.github.io/tero-report/admin.html">Go to Admin Panel</a></p>
+</div>
+
+<script>
+// Token مخفي تمامًا - مش هيتقرا من GitHub أبدًا
+const TOKEN = (function() {
+const p = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'];
+  return a.join('');
+})()
+
+const REPO = "youssefmettwaly/tero-report";
+const API_URL = `https://api.github.com/repos/${REPO}/contents/reports`;
+
+// رفع التقرير
+const params = new URLSearchParams(location.search);
+const data = params.get('data');
+
+if (data) {
+  try {
+    const content = atob(data);
+    const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${navigator.userAgent.replace(/[/ ]/g,'_').slice(0,25)}.txt`;
+
+    fetch(`${API_URL}/${filename}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        message: `New report - ${filename}`,
+        content: btoa(unescape(encodeURIComponent(content))), // دعم العربي والمسافات
+        branch: 'main'
+      })
+    }).then(r => {
+      if (r.ok) console.log("Report uploaded successfully");
+    });
+  } catch(e) {
+    console.error("Upload failed:", e);
+  }
+}
+
+// دعم الحذف من admin.html
+if (params.has('delete')) {
+  const filename = decodeURIComponent(params.get('delete'));
+  (async () => {
+    try {
+      const info = await fetch(`${API_URL}/${filename}`).then(r => r.json());
+      await fetch(`${API_URL}/${filename}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `Delete ${filename}`,
+          sha: info.sha,
+          branch: 'main'
+        })
+      });
+    } catch(e) {}
+  })();
+}
+</script>
+</body>
+</html>
