@@ -1,0 +1,138 @@
+=== TERO HACK REPORT - METO ===
+
+Scan Time: 2025-11-18 19:49:11
+
+User: METO
+
+=== System Info ===
+
+OS Name:                   Microsoft Windows 11 Enterprise
+OS Version:                10.0.22631 N/A Build 22631
+
+=== Hardware ===
+
+CPU: 2.80GHz
+RAM: 15.9 GB
+GPU: 4600
+
+=== Installed Software (First 20) ===
+
+DisplayName                                                  
+-----------                                                  
+                                                             
+                                                             
+Microsoft 365 Apps for enterprise - en-us                    
+Microsoft OneDrive                                           
+Product Library                                              
+Synaptics Pointing Device Driver                             
+TeamViewer                                                   
+UltraVnc                                                     
+                                                             
+WinRAR 6.11 (64-bit)                                         
+Python 3.13.5 Documentation (64-bit)                         
+MiniTool Partition Wizard Free 12.9                          
+DiagnosticsHub_CollectionService                             
+Python 3.13.5 pip Bootstrap (64-bit)                         
+VNC Viewer 7.0.1                                             
+Status Monitor 5                                             
+Application Verifier x64 External Package (OnecoreUAP)       
+Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030
+vs_communityx64msi                                           
+Python 3.13.5 Executables (64-bit)
+
+=== User Accounts ===
+
+User accounts for \\METO
+
+-------------------------------------------------------------------------------
+Administrator            DefaultAccount           Guest                    
+METO                     WDAGUtilityAccount       
+The command completed successfully.
+
+Admins:
+Alias name     administrators
+Comment        Administrators have complete and unrestricted access to the computer/domain
+
+Members
+
+-------------------------------------------------------------------------------
+Administrator
+METO
+The command completed successfully.
+
+=== Network ===
+
+Local IP: 10.142.62.226
+IPv4 Address. . . . . . . . . . . : 10.142.62.226
+TCP    10.142.62.226:49675    37.252.224.68:5938     ESTABLISHED
+  TCP    10.142.62.226:49681    98.66.133.186:443      ESTABLISHED
+  TCP    10.142.62.226:49688    51.195.5.155:443       ESTABLISHED
+  TCP    10.142.62.226:49691    52.110.15.210:443      ESTABLISHED
+  TCP    10.142.62.226:50284    108.159.102.84:443     ESTABLISHED
+  TCP    10.142.62.226:50351    108.159.102.84:443     ESTABLISHED
+  TCP    10.142.62.226:50377    108.159.102.107:443    ESTABLISHED
+  TCP    10.142.62.226:50410    74.125.71.188:5228     ESTABLISHED
+  TCP    10.142.62.226:54149    140.82.113.25:443      ESTABLISHED
+  TCP    10.142.62.226:55101    3.175.196.34:443       ESTABLISHED
+  TCP    10.142.62.226:55844    108.159.102.40:443     ESTABLISHED
+  TCP    10.142.62.226:56528    104.18.27.48:443       ESTABLISHED
+  TCP    10.142.62.226:56976    3.175.196.34:443       ESTABLISHED
+  TCP    10.142.62.226:57215    18.172.226.105:443     ESTABLISHED
+  TCP    10.142.62.226:57308    151.101.65.91:443      ESTABLISHED
+  TCP    10.142.62.226:57527    108.159.102.84:443     ESTABLISHED
+  TCP    10.142.62.226:58601    192.178.204.94:443     ESTABLISHED
+  TCP    10.142.62.226:59054    2.23.221.131:443       ESTABLISHED
+  TCP    10.142.62.226:59055    199.232.214.172:80     ESTABLISHED
+  TCP    10.142.62.226:59057    2.23.221.131:443       ESTABLISHED
+  TCP    10.142.62.226:59059    199.232.214.172:80     ESTABLISHED
+  TCP    10.142.62.226:59065    2.23.221.131:443       ESTABLISHED
+  TCP    10.142.62.226:59067    199.232.214.172:80     ESTABLISHED
+  TCP    10.142.62.226:59069    2.23.221.131:443       ESTABLISHED
+  TCP    10.142.62.226:59070    199.232.214.172:80     ESTABLISHED
+  TCP    10.142.62.226:59075    2.23.221.131:443       ESTABLISHED
+  TCP    10.142.62.226:59076    199.232.214.172:80     ESTABLISHED
+  TCP    10.142.62.226:60373    74.125.71.188:5228     ESTABLISHED
+  TCP    10.142.62.226:60584    2.23.221.131:443       ESTABLISHED
+  TCP    10.142.62.226:60586    199.232.214.172:80     ESTABLISHED
+  TCP    10.142.62.226:60588    2.23.221.131:443       ESTABLISHED
+  TCP    10.142.62.226:61814    104.18.26.48:443       ESTABLISHED
+  TCP    10.142.62.226:61845    104.18.27.48:443       ESTABLISHED
+  TCP    10.142.62.226:62507    108.159.102.84:443     ESTABLISHED
+  TCP    10.142.62.226:62773    108.159.120.16:443     ESTABLISHED
+  TCP    10.142.62.226:64337    108.159.102.40:443     ESTABLISHED
+  TCP    10.142.62.226:64901    52.182.143.214:443     ESTABLISHED
+  TCP    10.142.62.226:64935    151.101.65.91:443      ESTABLISHED
+  TCP    127.0.0.1:5939         127.0.0.1:49685        ESTABLISHED
+  TCP    127.0.0.1:6800         127.0.0.1:63579        ESTABLISHED
+  TCP    127.0.0.1:6800         127.0.0.1:63581        ESTABLISHED
+  TCP    127.0.0.1:49685        127.0.0.1:5939         ESTABLISHED
+  TCP    127.0.0.1:49693        127.0.0.1:49694        ESTABLISHED
+  TCP    127.0.0.1:49694        127.0.0.1:49693        ESTABLISHED
+  TCP    127.0.0.1:63579        127.0.0.1:6800         ESTABLISHED
+  TCP    127.0.0.1:63581        127.0.0.1:6800         ESTABLISHED
+
+=== Open Ports (Common) ===
+
+Open: 445, 3389, 135
+
+=== Firewall ===
+
+Domain Profile Settings: 
+----------------------------------------------------------------------
+State                                 OFF
+
+Private Profile Settings: 
+----------------------------------------------------------------------
+State                                 OFF
+
+Public Profile Settings: 
+----------------------------------------------------------------------
+State                                 OFF
+Ok.
+
+=== Vulnerabilities ===
+
+FIREWALL IS OFF!
+Guest Account Active!
+
+Scan by tero hack report
