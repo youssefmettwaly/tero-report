@@ -149,8 +149,8 @@ function downloadReport() {
 
 function deleteReport(name) {
   if (confirm(`Delete ${name} permanently?`)) {
-    fetch(`https://youssefmettwaly.github.io/tero-report/upload.html?delete=${encodeURIComponent(name)}`)
-      .then(() => loadReports())
+fetch(`https://youssefmettwaly.github.io/tero-report/upload.html?delete=${encodeURIComponent(name)}`, {cache: "no-store"})
+  .then(() => loadReports())
       .catch(() => alert('Delete failed'));
   }
 }
@@ -168,3 +168,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
