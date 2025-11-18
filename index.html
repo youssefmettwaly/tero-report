@@ -8,100 +8,70 @@
     :root{--p:#e74c3c;--s:#27ae60;--d:#c0392b;--bg:#1a1a1a;--card:#2d2d2d;--text:#f0f0f0;}
     *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Tahoma,sans-serif;}
     body{background:var(--bg);color:var(--text);min-height:100vh;}
-   
-    /* === Top Bar === */
-    .topbar{
-      background:var(--p);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;
-      position:sticky;top:0;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,0.3);
-    }
+    .topbar{background:var(--p);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
     .site-name{font-size:1.4rem;font-weight:bold;color:white;}
-    .auth-btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;
-      background:white;color:var(--p);transition:0.3s;}
-    .auth-btn:hover{transform:scale(1.05);background:#f0f0f0;}
-    /* === Login Page === */
-    .login-container{
-      display:flex;justify-content:center;align-items:center;min-height:90vh;
-    }
-    .login-box{
-      background:var(--card);padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.5);
-      width:100%;max-width:420px;text-align:center;
-    }
+    .auth-btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;background:white;color:var(--p);}
+    .auth-btn:hover{opacity:0.9;}
+    .login-container{display:flex;justify-content:center;align-items:center;min-height:90vh;}
+    .login-box{background:var(--card);padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.5);width:100%;max-width:420px;text-align:center;}
     .login-box h2{color:var(--p);margin-bottom:20px;font-size:1.8rem;}
-    input{width:100%;padding:14px;margin:12px 0;border:none;border-radius:10px;
-      background:#3a3a3a;color:white;font-size:1rem;}
-    input::placeholder{color:#aaa;}
-    .login-btn{width:100%;padding:14px;background:var(--p);color:white;border:none;
-      border-radius:10px;font-weight:bold;cursor:pointer;margin-top:10px;transition:0.3s;}
+    input{width:100%;padding:14px;margin:12px 0;border:none;border-radius:10px;background:#3a3a3a;color:white;}
+    .login-btn{width:100%;padding:14px;background:var(--p);color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:10px;}
     .login-btn:hover{background:#c0392b;}
-    .error{color:#ff6 Boston6b;margin-top:10px;font-size:0.9rem;}
-    /* === Dashboard === */
+    .error{color:#ff6b6b;margin-top:10px;}
     .container{max-width:1100px;margin:20px auto;padding:0 20px;}
-    .card{background:var(--card);border-radius:12px;overflow:hidden;
-      box-shadow:0 5px 20px rgba(0,0,0,0.4);margin-bottom:25px;}
+    .card{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 5px 20px rgba(0,0,0,0.4);margin-bottom:25px;}
     .card-header{background:var(--p);color:white;padding:16px;text-align:center;font-size:1.2rem;}
     .card-body{padding:25px;}
-    .report-item{
-      background:#3a3a3a;padding:16px;border-radius:10px;margin-bottom:12px;
-      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
-      transition:0.2s;
-    }
+    .report-item{background:#3a3a3a;padding:16px;border-radius:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;transition:0.2s;}
     .report-item:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.3);}
     .report-name{font-weight:600;font-size:1.1rem;}
     .report-meta{font-size:0.85rem;color:#aaa;margin-top:4px;}
-    .btn-sm{padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;
-      font-weight:600;margin:2px;}
+    .btn-sm{padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;margin:2px;}
     .btn-view{background:var(--s);color:white;}
     .btn-delete{background:var(--d);color:white;}
     .btn-sm:hover{opacity:0.9;}
-    /* === Modal === */
-    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:2000;}
-    .modal-content{background:var(--card);padding:25px;border-radius:16px;
-      max-width:900px;width:90%;max-height:85vh;overflow:auto;position:relative;}
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:2000;}
+    .modal-content{background:var(--card);padding:25px;border-radius:16px;max-width:900px;width:90%;max-height:85vh;overflow:auto;position:relative;}
     .close{float:right;font-size:28px;cursor:pointer;color:#aaa;}
     .close:hover{color:white;}
-    pre{white-space:pre-wrap;font-family:monospace;background:#1e1e1e;padding:15px;
-      border-radius:8px;color:#0f0;margin:15px 0;max-height:60vh;overflow:auto;}
-    .download-btn{margin-top:15px;background:var(--s);color:white;padding:10px 20px;
-      border:none;border-radius:8px;cursor:pointer;font-weight:bold;}
+    pre{white-space:pre-wrap;font-family:monospace;background:#1e1e1e;padding:15px;border-radius:8px;color:#0f0;margin:15px 0;max-height:60vh;overflow:auto;}
+    .download-btn{margin-top:15px;background:var(--s);color:white;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;}
     .hidden{display:none !important;}
     .footer{text-align:center;padding:30px;color:#666;font-size:0.9rem;}
   </style>
 </head>
 <body>
-<!-- === Top Bar === -->
+
 <div class="topbar">
   <div class="site-name">tero hack report</div>
   <button id="authButton" class="auth-btn" onclick="toggleAuth()">Login</button>
 </div>
 
-<!-- === Login Page === -->
 <div id="loginPage" class="login-container">
   <div class="login-box">
     <h2>IT Admin Login</h2>
-    <input type="text" id="username" placeholder="Username" value="">
-    <input type="password" id="password" placeholder="Password" value="">
-    <button class="login-btn" onclick="login()">Login to Dashboard</button>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button class="login-btn" onclick="login()">Login</button>
     <p id="errorMsg" class="error"></p>
   </div>
 </div>
 
-<!-- === Dashboard === -->
 <div id="dashboard" class="container hidden">
   <div class="card">
     <div class="card-header">Uploaded Hack Reports</div>
     <div class="card-body">
-      <div id="reportsList">Loading reports from server...</div>
+      <div id="reportsList">Loading...</div>
     </div>
   </div>
-  <div class="footer">© 2025 tero hack report • Internal IT Use Only</div>
+  <div class="footer">© 2025 tero hack report</div>
 </div>
 
-<!-- === Modal === -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">×</span>
-    <h3 id="modalTitle" style="color:var(--p);margin-bottom:15px;"></h3>
+    <h3 id="modalTitle" style="color:var(--p);"></h3>
     <pre id="modalContent"></pre>
     <button class="download-btn" onclick="downloadReport()">Download Report (.txt)</button>
   </div>
@@ -111,115 +81,89 @@
 const USER = "meto";
 const PASS = "511970";
 
-// === Auth Functions ===
 function toggleAuth() {
-  const isLoggedIn = !document.getElementById('dashboard').classList.contains('hidden');
-  if (isLoggedIn) logout();
-  else {
-    document.getElementById('loginPage').style.display = 'flex';
-    document.getElementById('dashboard').classList.add('hidden');
-    document.getElementById('authButton').textContent = 'Login';
-  }
+  const logged = !document.getElementById('dashboard').classList.contains('hidden');
+  if (logged) logout(); else { document.getElementById('loginPage').style.display='flex'; }
 }
-
 function login() {
   const u = document.getElementById('username').value.trim();
   const p = document.getElementById('password').value;
-  const err = document.getElementById('errorMsg');
   if (u === USER && p === PASS) {
-    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('loginPage').style.display='none';
     document.getElementById('dashboard').classList.remove('hidden');
-    document.getElementById('authButton').textContent = 'Logout';
+    document.getElementById('authButton').textContent='Logout';
     loadReports();
-  } else {
-    err.textContent = "Invalid credentials!";
-  }
+  } else document.getElementById('errorMsg').textContent = "Wrong username or password!";
 }
-
 function logout() {
   document.getElementById('dashboard').classList.add('hidden');
-  document.getElementById('loginPage').style.display = 'flex';
-  document.getElementById('authButton').textContent = 'Login';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('authButton').textContent='Login';
   document.getElementById('username').value = '';
   document.getElementById('password').value = '';
-  document.getElementById('errorMsg').textContent = '';
 }
 
-// === Load Reports from GitHub ===
 async function loadReports() {
   const list = document.getElementById('reportsList');
   try {
     const res = await fetch('https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports');
     const files = await res.json();
-    if (!Array.isArray(files) || files.length === 0) {
-      list.innerHTML = '<p style="text-align:center;color:#aaa;">No hack reports uploaded yet</p>';
+    if (!files.length) {
+      list.innerHTML = '<p style="text-align:center;color:#aaa;">No reports yet</p>';
       return;
     }
-
-    files.sort((a, b) => b.name.localeCompare(a.name));
-
-    list.innerHTML = files.map((file, i) => `
+    files.sort((a,b) => b.name.localeCompare(a.name));
+    list.innerHTML = files.map(f => `
       <div class="report-item">
         <div>
-          <div class="report-name">${file.name}</div>
+          <div class="report-name">${f.name}</div>
           <div class="report-meta">Uploaded: ${new Date().toLocaleString('en-EG')}</div>
         </div>
         <div>
-          <button class="btn-sm btn-view" onclick="viewReport('${file.download_url}')">View</button>
-          <a href="${file.download_url}" download class="btn-sm" style="background:#27ae60;color:white;">Download</a>
-          <button class="btn-sm btn-delete" onclick="deleteReport('${file.name}')">Delete</button>
+          <button class="btn-sm btn-view" onclick="viewReport('${f.download_url}')">View</button>
+          <a href="${f.download_url}" download class="btn-sm" style="background:#27ae60;color:white;text-decoration:none;">Download</a>
+          <button class="btn-sm btn-delete" onclick="deleteReport('${f.name}')">Delete</button>
         </div>
       </div>
     `).join('');
-  } catch (e) {
-    list.innerHTML = '<p style="color:#ff6b6b;text-align:center;">Failed to load reports</p>';
+  } catch(e) {
+    list.innerHTML = '<p style="color:#ff6b6b;">Failed to load reports</p>';
   }
 }
 
-// === View Report ===
 async function viewReport(url) {
-  try {
-    const res = await fetch(url);
-    const content = await res.text();
-    document.getElementById('modalTitle').textContent = url.split('/').pop();
-    document.getElementById('modalContent').textContent = content;
-    document.getElementById('modal').style.display = 'flex';
-    window.currentContent = content;
-    window.currentFile = url.split('/').pop();
-  } catch (e) {
-    alert("Failed to load report");
-  }
+  const txt = await fetch(url).then(r => r.text());
+  document.getElementById('modalTitle').textContent = url.split('/').pop();
+  document.getElementById('modalContent').textContent = txt;
+  document.getElementById('modal').style.display = 'flex';
+  window.currentContent = txt;
+  window.currentFile = url.split('/').pop();
 }
 
-// === Download Report ===
 function downloadReport() {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([window.currentContent], {type: 'text/plain'}));
+  a.href = URL.createObjectURL(new Blob([window.currentContent], {type:'text/plain'}));
   a.download = window.currentFile;
   a.click();
 }
 
-// === Delete Report (via upload.html proxy) ===
-function deleteReport(filename) {
-  if (!confirm(`Delete ${filename} permanently?`)) return;
-  const proxyUrl = `https://youssefmettwaly.github.io/tero-report/upload.html?delete=${encodeURIComponent(filename)}`;
-  fetch(proxyUrl).then(() => loadReports()).catch(() => alert("Delete failed"));
+function deleteReport(name) {
+  if (confirm(`Delete ${name} permanently?`)) {
+    fetch(`https://youssefmettwaly.github.io/tero-report/upload.html?delete=${encodeURIComponent(name)}`)
+      .then(() => loadReports())
+      .catch(() => alert('Delete failed'));
+  }
 }
 
-function closeModal() {
-  document.getElementById('modal').style.display = 'none';
-}
+function closeModal() { document.getElementById('modal').style.display='none'; }
 
-// === Auto Refresh ===
 setInterval(() => {
   if (!document.getElementById('dashboard').classList.contains('hidden')) loadReports();
 }, 10000);
 
-// === On Load ===
 window.onload = () => {
   document.getElementById('dashboard').classList.add('hidden');
-  document.getElementById('loginPage').style.display = 'flex';
-  document.getElementById('authButton').textContent = 'Login';
+  document.getElementById('loginPage').style.display='flex';
 };
 </script>
 </body>
