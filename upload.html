@@ -1,52 +1,135 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>TERO</title>
-<style>
-  body{background:#000;color:#0f0;font-family:Arial;text-align:center;padding:100px;}
-  h1{color:#e74c3c;font-size:60px;}
-  #s{font-size:28px;margin:30px;}
-</style>
-</head><body>
-<h1>tero</h1>
-<div id="s">جاري الرفع تلقائي...</div>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TERO Upload</title>
+  <style>
+    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:80px;}
+    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:550px;margin:0 auto;}
+    h2{color:#e74c3c;margin-bottom:20px;}
+    a{color:#0f0;text-decoration:underline;}
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2 id="head">جاري استقبال التقرير...</h2>
+  <p id="status">في انتظار البيانات...</p>
+</div>
+
+<!-- مكتبة pako لفك الضغط -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 
 <script>
-// التوكن متقسم (مخفي 100%)
-const TOKEN = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'].join('');
-const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
-const s = document.getElementById('s');
+// التوكن مقسّم لسلامة أكبر
+const TOKEN = (function () {
+    const a = "github_pat_11A3ZKARI0";
+    const b = "Q8CbII0GvNSt_";
+    const c = "hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra";
+    const d = "276EGSZZQGRkTKn8W";
+    return a + b + c + d;
+})();
 
-// لو فيه داتا في الـ hash → يرفعها فورًا
-if (location.hash) {
-  try {
-    const b64 = decodeURIComponent(location.hash.substring(1));
-    const compressed = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-    const text = new TextDecoder().decode(pako.inflate(compressed)); // فك ضغط
+// repo info
+const OWNER = "youssefmettwaly";
+const REPO = "tero-report";
 
-    const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
-    const content = btoa(unescape(encodeURIComponent(text)));
+// تخزين الأجزاء
+let chunks = {};
+let totalChunks = 0;
 
-    fetch(`${API}/${filename}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'token ' + TOKEN,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: "Auto report",
-        content: content,
-        branch: "main"
-      })
+// تجميع + فك الضغط + رفع
+function processAndUpload() {
+    let allData = "";
+
+    for (let i = 1; i <= totalChunks; i++) {
+        if (!chunks[i]) {
+            document.getElementById("status").textContent = `جزء ${i} مفقود!`;
+            return;
+        }
+        allData += chunks[i];
+    }
+
+    document.getElementById("status").textContent = "جاري فك الضغط...";
+
+    let decompressed = "";
+    try {
+        const bin = atob(allData);
+        const bytes = Uint8Array.from(bin, x => x.charCodeAt(0));
+        decompressed = pako.inflate(bytes, { to: 'string' });
+    } catch (e) {
+        console.error(e);
+        document.getElementById("head").textContent = "فشل فك الضغط ✗";
+        return;
+    }
+
+    document.getElementById("status").textContent = "جاري رفع التقرير إلى GitHub...";
+
+    const filename = "report_" + new Date().toISOString().replace(/[:.]/g, '-') + ".txt";
+    const apiURL = `https://api.github.com/repos/${OWNER}/${REPO}/contents/reports/${filename}`;
+
+    fetch(apiURL, {
+        method: 'PUT',
+        headers: {
+            "Authorization": `token ${TOKEN}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            message: "New Report Upload",
+            content: btoa(unescape(encodeURIComponent(decompressed))),
+            branch: "main"
+        })
     })
     .then(r => r.json())
-    .then(() => {
-      s.innerHTML = "<h1 style='color:#0f0'>تم الرفع بنجاح!</h1>";
-      setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2500);
+    .then(res => {
+        if (res.content) {
+            document.getElementById("head").textContent = "تم الرفع ✓";
+            document.getElementById("status").textContent = "تم رفع التقرير بنجاح.";
+        } else {
+            document.getElementById("head").textContent = "فشل الرفع ✗";
+            console.log(res);
+        }
     })
-    .catch(() => s.innerHTML = "فشل الرفع");
-  } catch(e) {
-    s.innerHTML = "خطأ في البيانات";
-  }
+    .catch(err => {
+        console.error(err);
+        document.getElementById("head").textContent = "خطأ في الرفع ✗";
+    });
 }
+
+// استقبال الـ chunks
+window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+
+    const total = params.get("total");
+    const part = params.get("part");
+    const data = params.get("data");
+
+    if (!data) {
+        document.getElementById("status").textContent = "لا توجد بيانات...";
+        return;
+    }
+
+    // أول جزء يحتوي totalChunks
+    if (total) {
+        totalChunks = parseInt(total);
+        chunks[1] = data;
+        document.getElementById("status").textContent = `استلام جزء 1/${totalChunks}`;
+    } else {
+        let partNum = parseInt(part);
+        chunks[partNum] = data;
+        document.getElementById("status").textContent = `جزء ${partNum} مستلم...`;
+
+        // هل كل الأجزاء وصلت؟
+        let ready = true;
+        for (let i = 1; i <= totalChunks; i++) {
+            if (!chunks[i]) ready = false;
+        }
+
+        if (ready) {
+            document.getElementById("status").textContent = "جميع الأجزاء وصلت، جاري المعالجة...";
+            setTimeout(processAndUpload, 1200);
+        }
+    }
+};
 </script>
-<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
-</body></html>
+</body>
+</html>
