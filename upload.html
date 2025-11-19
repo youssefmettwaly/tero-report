@@ -23,7 +23,7 @@ if (filePath) {
       })
       .then(() => {
         document.getElementById('s').innerHTML = "تم الرفع!";
-        // حذف الملف
+        // حذف 
         fetch('file:///' + decodeURIComponent(filePath), {method:'DELETE'}).catch(()=>{});
         setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
       });
