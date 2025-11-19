@@ -1,0 +1,22 @@
+TERO AUDIT - METO
+Time: 2025-11-19 20:36:22
+User: METO | IP: 10.142.62.226
+OS: OS Name:                   Microsoft Windows 11 Enterprise OS Version:                10.0.22631 N/A Build 22631 BIOS Version:              Hewlett-Packard M70 Ver. 01.12, 9/23/2015
+
+Browser Passwords:
+No saved passwords
+
+WiFi Passwords:
+Youssef's A16==>12345678
+TEdataC27396==>gety2020gety
+IT Office==>IT@wifi1
+AEA==>AMMARAMMAR10121980#
+Joe==>yyyyyyyy
+Meto==>Resta333mkhalil##
+
+Credentials:
+Currently stored credentials:      Target: MicrosoftAccount:target=SSO_POP_Device     Type: Generic      User: 02zekbkcfiqnxpcg     Saved for this logon only          Target: LegacyGeneric:target=Olk/PushNotificationsBackupKey     Type: Generic      User: Olk/PushNotificationsBackupKey     Local machine persistence          Target: Domain:target=TERMSRV/10.142.62.12     Type: Domain Password     User: Administrator     Local machine persistence          Target: WindowsLive:target=virtualapp/didlogical     Type: Generic      User: 02zekbkcfiqnxpcg     Local machine persistence          Target: LegacyGeneric:target=Olk/PushNotificationsKey     Type: Generic      User: Olk/PushNotificationsKey     Local machine persistence          Target: Domain:target=10.142.62.128     Type: Domain Password     User: Administrator          Target: Domain:target=10.142.62.221     Type: Domain Password     User: Administrator          Target: Domain:target=10.142.62.205     Type: Domain Password     User: Administrator          Target: Domain:target=WS-RPSH-FD-103     Type: Domain Password     User: Administrator          Target: Domain:target=10.142.62.125     Type: Domain Password     User: Administrator          Target: LegacyGeneric:target=GitHub - https://api.github.com/youssefmettwaly     Type: Generic      User: youssefmettwaly          Target: Domain:target=10.142.62.166     Type: Domain Password     User: Adminstator          Target: Domain:target=10.142.62.1     Type: Domain Password     User: Administrator          Target: Domain:target=10.142.62.9     Type: Domain Password     User: Administrator
+
+Issues: Firewall OFF
+
+End of audit
