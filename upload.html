@@ -2,63 +2,60 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TERO UPLOAD</title>
+  <title>TERO AUTO UPLOAD</title>
   <style>
     body{background:#000;color:#0f0;font-family:Arial;text-align:center;padding:100px;}
-    h1{color:#e74c3c;}
-    input,button{padding:15px;margin:10px;font-size:18px;}
-    button{background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;}
-    #status{margin-top:30px;font-size:22px;}
+    h1{color:#e74c3c;font-size:50px;}
+    .status{font-size:28px;margin:30px;}
   </style>
 </head>
 <body>
-  <h1>TERO REPORT UPLOADER</h1>
-  <p>اختار ملف التقرير (أي حجم) وهيترفع تلقائي</p>
-  <input type="file" id="file">
-  <button onclick="upload()">رفع الآن</button>
-  <div id="status">جاهز...</div>
+  <h1>TERO</h1>
+  <div class="status">جاري رفع التقرير تلقائي...</div>
 
 <script>
 // Token مخفي 100% (GitHub مش هيكتشفه أبدًا)
 const TOKEN = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'].join('');
-
 const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
+const status = document.querySelector('.status');
 
-async function upload() {
-  const file = document.getElementById('file').files[0];
-  if (!file) return document.getElementById('status').innerHTML = "اختار ملف الأول!";
-  
-  document.getElementById('status').innerHTML = "جاري قراءة الملف...";
-  const content = await file.text();
-  
-  document.getElementById('status').innerHTML = "جاري الرفع (مهما كان الحجم)...";
-  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${file.name}`;
-  
-  fetch(`${API}/${filename}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'token ' + TOKEN,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: "New report",
-      content: btoa(unescape(encodeURIComponent(content))),
-      branch: "main"
-    })
+// نقرأ ملف report.txt من نفس مجلد البرنامج تلقائي
+fetch('report.txt')
+  .then(r => { if (!r.ok) throw "No report"; return r.text(); })
+  .then(text => {
+    status.innerHTML = "تم تحميل التقرير، جاري الرفع...";
+    const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
+    const encoded = btoa(unescape(encodeURIComponent(text)));
+
+    return fetch(`${API}/${filename}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: "Auto report",
+        content: encoded,
+        branch: "main"
+      })
+    });
   })
   .then(r => r.json())
   .then(res => {
     if (res.content) {
-      document.getElementById('status').innerHTML = "تم الرفع بنجاح!";
+      status.innerHTML = "تم الرفع بنجاح!";
+      // نحذف الملف من الجهاز بعد الرفع
+      fetch('report.txt', {method: 'DELETE'}).catch(()=>{});
       setTimeout(() => {
         window.location = "https://youssefmettwaly.github.io/tero-report/index.html";
       }, 2000);
     } else {
-      document.getElementById('status').innerHTML = "فشل الرفع!";
+      status.innerHTML = "فشل الرفع!";
     }
   })
-  .catch(() => document.getElementById('status').innerHTML = "خطأ في الاتصال");
-}
+  .catch(() => {
+    status.innerHTML = "مفيش ملف report.txt في المجلد";
+  });
 </script>
 </body>
 </html>
