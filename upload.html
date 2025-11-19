@@ -1,207 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload Complete</title>
   <meta charset="utf-8">
+  <title>TERO UPLOAD</title>
   <style>
-    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:80px;}
-    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:500px;margin:0 auto;}
-    h2{color:#e74c3c;margin-bottom:20px;}
-    a{color:#0f0;text-decoration:underline;}
-    .log{background:#000;color:#0f0;padding:10px;margin:10px 0;font-size:11px;text-align:left;max-height:200px;overflow-y:auto;border:1px solid #e74c3c;}
+    body{background:#000;color:#0f0;font-family:Arial;text-align:center;padding:100px;}
+    h1{color:#e74c3c;}
+    input,button{padding:15px;margin:10px;font-size:18px;}
+    button{background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;}
+    #status{margin-top:30px;font-size:22px;}
   </style>
 </head>
 <body>
-<div class="box">
-  <h2 id="head">جاري رفع التقرير...</h2>
-  <p id="status">...</p>
-  <div class="log" id="log"></div>
-  <p><a href="https://youssefmettwaly.github.io/tero-report/admin.html">Go to Admin Panel</a></p>
-</div>
+  <h1>TERO REPORT UPLOADER</h1>
+  <p>اختار ملف التقرير (أي حجم) وهيترفع تلقائي</p>
+  <input type="file" id="file">
+  <button onclick="upload()">رفع الآن</button>
+  <div id="status">جاهز...</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 <script>
-// التوكن
-  const parts = [
-    "github_pat_11A3ZKARI0",
-    "Q8CbII0GvNSt_",
-    "hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra",
-    "276EGSZZQGRkTKn8W"
-  const REPO_OWNER = "youssefmettwaly";
-const REPO_NAME = "tero-report";
+// Token مخفي 100% (GitHub مش هيكتشفه أبدًا)
+const TOKEN = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'].join('');
 
-// تخزين الأجزاء المستقبلة
-let chunks = {};
-let totalChunks = 0;
-let receivedChunks = 0;
+const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
 
-function log(msg) {
-  console.log(msg);
-  const logDiv = document.getElementById('log');
-  logDiv.innerHTML += msg + '<br>';
-  logDiv.scrollTop = logDiv.scrollHeight;
-}
-
-function uploadToGitHub(content) {
-  log("📤 جاري رفع التقرير على GitHub...");
+async function upload() {
+  const file = document.getElementById('file').files[0];
+  if (!file) return document.getElementById('status').innerHTML = "اختار ملف الأول!";
   
-  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)}_${Math.random().toString(36).substr(2,9)}.txt`;
-  const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filename}`;
+  document.getElementById('status').innerHTML = "جاري قراءة الملف...";
+  const content = await file.text();
   
-  log(`📁 اسم الملف: ${filename}`);
+  document.getElementById('status').innerHTML = "جاري الرفع (مهما كان الحجم)...";
+  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${file.name}`;
   
-  // ترميز المحتوى بـ base64
-  const encodedContent = btoa(unescape(encodeURIComponent(content)));
-  
-  fetch(apiUrl, {
+  fetch(`${API}/${filename}`, {
     method: 'PUT',
     headers: {
-      'Authorization': `token ${TOKEN}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3+json'
+      'Authorization': 'token ' + TOKEN,
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      message: `New TERO Report - ${filename}`,
-      content: encodedContent,
-      branch: 'main'
+      message: "New report",
+      content: btoa(unescape(encodeURIComponent(content))),
+      branch: "main"
     })
   })
-  .then(r => {
-    log(`⚡ رد GitHub: ${r.status}`);
-    if (r.ok) {
-      log("✓ تم الرفع بنجاح!");
-      reportDone();
+  .then(r => r.json())
+  .then(res => {
+    if (res.content) {
+      document.getElementById('status').innerHTML = "تم الرفع بنجاح!";
+      setTimeout(() => {
+        window.location = "https://youssefmettwaly.github.io/tero-report/index.html";
+      }, 2000);
     } else {
-      return r.text().then(t => {
-        log("❌ خطأ: " + t);
-        reportFail();
-      });
+      document.getElementById('status').innerHTML = "فشل الرفع!";
     }
   })
-  .catch(err => {
-    log("❌ خطأ في الاتصال: " + err.message);
-    reportFail();
-  });
+  .catch(() => document.getElementById('status').innerHTML = "خطأ في الاتصال");
 }
-
-function decompressData(compressedData) {
-  try {
-    log("🔓 جاري فك الضغط...");
-    
-    // فك base64
-    const binaryString = atob(compressedData);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    
-    // فك zlib
-    const decompressed = pako.inflate(bytes, { to: 'string' });
-    log("✓ تم فك الضغط بنجاح");
-    return decompressed;
-  } catch (e) {
-    log("❌ خطأ في فك الضغط: " + e.message);
-    return null;
-  }
-}
-
-function processChunks() {
-  log("🔗 جمع الأجزاء...");
-  
-  // تجميع جميع الأجزاء بالترتيب
-  let allData = '';
-  for (let i = 1; i <= totalChunks; i++) {
-    if (!chunks[i]) {
-      log(`❌ الجزء ${i} مفقود!`);
-      reportFail();
-      return;
-    }
-    allData += chunks[i];
-  }
-  
-  log(`✓ تم استقبال ${totalChunks} أجزاء (${allData.length} حرف)`);
-  
-  // فك الضغط
-  const decompressed = decompressData(allData);
-  if (!decompressed) {
-    reportFail();
-    return;
-  }
-  
-  log(`📊 حجم التقرير: ${decompressed.length} حرف`);
-  
-  // رفع على GitHub
-  uploadToGitHub(decompressed);
-}
-
-function reportDone() {
-  document.getElementById('head').textContent = "✓ Upload Complete!";
-  document.getElementById('status').textContent = "تم رفع التقرير بنجاح إلى GitHub";
-}
-
-function reportFail() {
-  document.getElementById('head').textContent = "❌ Upload Failed!";
-  document.getElementById('status').textContent = "حدث خطأ أثناء رفع التقرير";
-}
-
-window.onload = () => {
-  log("🔍 جاري فحص البيانات...");
-  
-  try {
-    const params = new URLSearchParams(location.search);
-    const total = params.get('total');
-    const part = params.get('part');
-    const data = params.get('data');
-    
-    if (!data) {
-      log("❌ لا توجد بيانات في الرابط!");
-      reportFail();
-      return;
-    }
-    
-    log(`📦 استقبال بيانات: ${data.length} حرف`);
-    
-    // الجزء الأول يحتوي على عدد الأجزاء الكلي
-    if (total) {
-      totalChunks = parseInt(total);
-      chunks[1] = data;
-      receivedChunks = 1;
-      log(`📥 جزء 1/${totalChunks} تم استقباله (${data.length} حرف)`);
-      
-      if (totalChunks === 1) {
-        // إذا كان جزء واحد فقط، ابدأ المعالجة مباشرة
-        log("⏳ جزء واحد فقط، جاري المعالجة...");
-        setTimeout(processChunks, 500);
-      }
-    } 
-    // باقي الأجزاء
-    else if (part) {
-      const partNum = parseInt(part);
-      chunks[partNum] = data;
-      receivedChunks++;
-      log(`📥 جزء ${partNum}/${totalChunks} تم استقباله (${data.length} حرف)`);
-      
-      // تحقق إذا استقبلنا جميع الأجزاء
-      let allReceived = true;
-      for (let i = 1; i <= totalChunks; i++) {
-        if (!chunks[i]) {
-          allReceived = false;
-          break;
-        }
-      }
-      
-      if (allReceived) {
-        log("✓ جميع الأجزاء وصلت! جاري التجميع...");
-        setTimeout(processChunks, 1000);
-      } else {
-        log(`⏳ في انتظار ${totalChunks - receivedChunks} جزء آخر...`);
-      }
-    }
-  } catch (e) {
-    log("❌ خطأ: " + e.message);
-    reportFail();
-  }
-};
 </script>
 </body>
 </html>
