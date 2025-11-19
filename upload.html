@@ -7,20 +7,14 @@
     body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:100px;}
     .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:600px;margin:0 auto;}
     h2{color:#e74c3c;}
-    input[type=file]{margin:20px;padding:15px;background:#222;color:#0f0;border:2px solid #e74c3c;border-radius:10px;}
-    button{padding:15px 30px;background:#e74c3c;color:white;border:none;border-radius:10px;font-size:18px;cursor:pointer;}
-    button:hover{background:#c0392b;}
-    .status{color:#0f0;margin-top:20px;font-size:20px;}
+    .status{color:#0f0;font-size:20px;margin:20px;}
   </style>
 </head>
 <body>
 <div class="box">
-  <h2>TERO REPORT UPLOADER</h2>
-  <p>اختار ملف التقرير عشان يترفع تلقائي:</p>
-  <input type="file" id="fileInput" accept=".txt">
-  <br>
-  <button onclick="uploadFile()">رفع التقرير الآن</button>
-  <div class="status" id="status">جاهز للرفع...</div>
+  <h2>TERO UPLOADER</h2>
+  <p id="msg">جاري تحميل التقرير تلقائي...</p>
+  <div class="status" id="status">انتظر قليلاً...</div>
 </div>
 
 <script>
@@ -31,46 +25,53 @@ const GITHUB_TOKEN = (function(){
 }());
 
 const API_URL = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
+const status = document.getElementById('status');
+const msg = document.getElementById('msg');
 
-async function uploadFile() {
-  const fileInput = document.getElementById('fileInput');
-  const status = document.getElementById('status');
+const params = new URLSearchParams(location.search);
+const autoFile = params.get('auto');
+
+if (autoFile) {
+  const filePath = decodeURIComponent(autoFile);
+  const filename = filePath.split(/[\\/]/).pop();
   
-  if (!fileInput.files[0]) {
-    status.innerHTML = "اختار ملف الأول!";
-    return;
-  }
-
-  const file = fileInput.files[0];
-  const content = await file.text();
-  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-') }.txt`;
-
-  status.innerHTML = "جاري الرفع...";
-
-  fetch(`${API_URL}/${filename}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `token ${GITHUB_TOKEN}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: "New report",
-      content: btoa(unescape(encodeURIComponent(content))),
-      branch: "main"
+  // محاكاة اختيار ملف + رفع تلقائي
+  fetch(`file://${filePath}`)
+    .then(r => r.text())
+    .then(content => {
+      status.innerHTML = "تم تحميل الملف، جاري الرفع...";
+      const encoded = btoa(unescape(encodeURIComponent(content)));
+      const finalName = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${filename}`;
+      
+      return fetch(`${API_URL}/${finalName}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: "Auto report",
+          content: encoded,
+          branch: "main"
+        })
+      });
     })
-  })
-  .then(r => r.json())
-  .then(res => {
-    if (res.content) {
-      status.innerHTML = "تم الرفع بنجاح!";
-      setTimeout(() => {
-        window.location.href = "https://youssefmettwaly.github.io/tero-report/index.html";
-      }, 2000);
-    } else {
-      status.innerHTML = "فشل الرفع!";
-    }
-  })
-  .catch(() => status.innerHTML = "خطأ في الاتصال");
+    .then(r => r.json())
+    .then(res => {
+      if (res.content) {
+        status.innerHTML = "تم الرفع بنجاح!";
+        setTimeout(() => {
+          window.location = "https://youssefmettwaly.github.io/tero-report/index.html";
+        }, 2000);
+      } else {
+        status.innerHTML = "فشل الرفع";
+      }
+    })
+    .catch(() => {
+      status.innerHTML = "خطأ - افتح الملف يدوي وارفع";
+    });
+} else {
+  msg.innerHTML = "مفيش تقرير تلقائي";
 }
 </script>
 </body>
