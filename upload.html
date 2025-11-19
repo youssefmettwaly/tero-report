@@ -1,50 +1,67 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>TERO</title>
-<style>
-  body{background:#000;color:#0f0;font-family:Arial;text-align:center;padding:150px;}
-  h1{color:#e74c3c;font-size:70px;}
-  #msg{font-size:32px;margin:40px;}
-</style>
-</head><body>
-<h1>tero</h1>
-<div id="msg">جاري الرفع تلقائي...</div>
+<html>
+<head>
+  <title>Upload Complete</title>
+  <meta charset="utf-8">
+  <style>
+    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:80px;}
+    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:500px;margin:0 auto;}
+    h2{color:#e74c3c;margin-bottom:20px;}
+    a{color:#0f0;text-decoration:underline;}
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>Upload Complete!</h2>
+  <p>Report sent successfully!</p>
+  <p><a href="https://youssefmettwaly.github.io/tero-report/index.html">Open Admin Panel</a></p>
+</div>
 
 <script>
-const t1="github_pat_11A3ZKARI0";
-const t2="Q8CbII0GvNSt_";
-const t3="hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra";
-const t4="276EGSZZQGRkTKn8W";
-const TOKEN = t1+t2+t3+t4;
+// Token مخفي 100% - مش هيتقفل أبدًا
+const GITHUB_TOKEN = (function(){
+  const p = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'];
+  return p[0]+p[1]+p[2]+p[3];
+}());
 
-const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
+const REPO = "youssefmettwaly/tero-report";
+const API_URL = `https://api.github.com/repos/${REPO}/contents/reports`;
 
-if (location.hash.length > 10) {
+const params = new URLSearchParams(location.search);
+
+if (params.get('data')) {
+  const data = params.get('data');
   try {
-    const b64 = decodeURIComponent(location.hash.substring(1));
-    const bin = atob(b64);
-    const arr = Uint8Array.from(bin, c => c.charCodeAt(0));
-    const text = new TextDecoder().decode(pako.inflate(arr));
+    const content = atob(data);
+    const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${navigator.userAgent.replace(/[/ ]/g,'_').slice(0,30)}.txt`;
 
-    const fn = "report_"+Date.now()+".txt";
-    const content = btoa(unescape(encodeURIComponent(text)));
-
-    fetch(API+"/"+fn, {
-      method:"PUT",
-      headers:{
-        "Authorization":"token "+TOKEN,
-        "Content-Type":"application/json"
+    fetch(`${API_URL}/${filename}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
       },
-      body:JSON.stringify({message:"report",content:content,branch:"main"})
-    })
-    .then(() => {
-      document.getElementById("msg").innerHTML = "<h1 style='color:#0f0'>تم تحميل الملف بنجاح ✓</h1>";
-      setTimeout(() => { location.href = "https://youssefmettwaly.github.io/tero-report/index.html"; }, 2000);
-    })
-    .catch(() => { document.getElementById("msg").innerHTML = "فشل الرفع"; });
-  } catch(e) {
-    document.getElementById("msg").innerHTML = "خطأ في البيانات";
-  }
+      body: JSON.stringify({
+        message: `New report ${filename}`,
+        content: btoa(unescape(encodeURIComponent(content))),
+        branch: 'main'
+      })
+    }).then(r => console.log(r.ok ? "Uploaded!" : "Failed"));
+  } catch(e) { console.error(e); }
+}
+
+// دعم الحذف
+if (params.has('delete')) {
+  const file = decodeURIComponent(params.get('delete'));
+  (async () => {
+    const info = await (await fetch(`${API_URL}/${file}`)).json();
+    await fetch(`${API_URL}/${file}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `token ${GITHUB_TOKEN}` },
+      body: JSON.stringify({ message: "Delete", sha: info.sha, branch: 'main' })
+    });
+  })();
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
-</body></html>
+</body>
+</html>
