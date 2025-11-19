@@ -74,7 +74,7 @@ function decompressData(compressedData) {
       bytes[i] = binaryString.charCodeAt(i);
     }
     
-    // فك الضغط (zlib)
+    
     // نستخدم pako library للفك
     return pako.inflate(bytes, { to: 'string' });
   } catch (e) {
