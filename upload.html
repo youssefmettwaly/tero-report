@@ -14,12 +14,12 @@
 <div class="box">
   <h2 id="head">جاري رفع التقرير...</h2>
   <p id="status">...</p>
-  <p><a href="https://youssefmettwaly.github.io/tero-report/admin.html">Go to Admin Panel</a></p>
+  <p><a href="https://youssefmettwaly.github.io/tero-report/index.html">Go to Admin Panel</a></p>
 </div>
 
 <script>
+// التوكن مقسّم لأمان أكثر
 const TOKEN = (function(){
-  // قسم كل جزء من التوكن لعنصر منفصل في مصفوفة (كل جزء 16-20 حرف تقريبا)
   const parts = [
     "github_pat_11A3ZKARI0",
     "Q8CbII0GvNSt_",
@@ -27,11 +27,20 @@ const TOKEN = (function(){
     "276EGSZZQGRkTKn8W"
   ];
   return parts.join('');
-})()
+})();
+
+const REPO_OWNER = "youssefmettwaly";
+const REPO_NAME = "tero-report";
+
+// تخزين الأجزاء المستقبلة
+let chunks = {};
+let totalChunks = 0;
 
 function uploadToGitHub(content) {
-  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${navigator.userAgent.replace(/[/ ]/g,'_').slice(0,25)}.txt`;
-  fetch(`${API_URL}/${filename}`, {
+  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
+  const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filename}`;
+  
+  fetch(apiUrl, {
     method: 'PUT',
     headers: {
       'Authorization': `token ${TOKEN}`,
@@ -43,51 +52,117 @@ function uploadToGitHub(content) {
       content: btoa(unescape(encodeURIComponent(content))),
       branch: 'main'
     })
-  }).then(r => r.ok ? reportDone() : reportFail())
-    .catch(reportFail)
+  }).then(r => {
+    if (r.ok) {
+      reportDone();
+    } else {
+      console.error('GitHub API error:', r.status);
+      reportFail();
+    }
+  }).catch(err => {
+    console.error('Upload error:', err);
+    reportFail();
+  });
 }
 
-function reportDone() {
-  document.getElementById('head').textContent = "Upload Complete!";
-  document.getElementById('status').textContent = "Report sent successfully to Admin Panel.";
+function decompressData(compressedData) {
+  try {
+    // فك الـ base64
+    const binaryString = atob(compressedData);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    // فك الضغط (zlib)
+    // نستخدم pako library للفك
+    return pako.inflate(bytes, { to: 'string' });
+  } catch (e) {
+    console.error('Decompression error:', e);
+    return null;
+  }
 }
-function reportFail() {
-  document.getElementById('head').textContent = "Upload Failed!";
-  document.getElementById('status').textContent = "حدث خطأ أثناء رفع التقرير.";
+
+function processChunks() {
+  // تجميع جميع الأجزاء بالترتيب
+  let allData = '';
+  for (let i = 1; i <= totalChunks; i++) {
+    if (!chunks[i]) {
+      console.error(`Missing chunk ${i}`);
+      reportFail();
+      return;
+    }
+    allData += chunks[i];
+  }
+  
+  // فك الضغط
+  const decompressed = decompressData(allData);
+  if (!decompressed) {
+    reportFail();
+    return;
+  }
+  
+  // رفع على GitHub
+  uploadToGitHub(decompressed);
 }
 
 window.onload = () => {
-  // دعم POST أو GET
-  let content = '';
-  // جلب البيانات من GET أو من POST عبر AJAX (عبر python backend يرسل عبر AJAX لصفحتك)
   try {
     const params = new URLSearchParams(location.search);
+    const total = params.get('total');
+    const part = params.get('part');
     const data = params.get('data');
-    if (data) {
-      content = atob(data);
-      uploadToGitHub(content);
+    
+    if (!data) {
+      document.getElementById('status').textContent = "لا توجد بيانات لرفعها";
+      reportFail();
       return;
     }
-  } catch(e) {}
-
-  // دعم POST AJAX مثلما يرسله البرنامج
-  if (window.FormData) {
-    fetch(window.location.href, {
-      method: 'POST'
-    }).then(r => r.text()).then(t => {
-      // ابحث عن كود الـreport بالـHTML:
-      let match = t.match(/name="data">([^<]+)<\/textarea>/);
-      if (match) {
-        content = atob(match[1]);
-        uploadToGitHub(content);
-      } else {
-        reportFail();
+    
+    // الجزء الأول يحتوي على عدد الأجزاء الكلي
+    if (total) {
+      totalChunks = parseInt(total);
+      chunks[1] = data;
+      document.getElementById('status').textContent = `جزء 1/${totalChunks} تم استقباله...`;
+    } 
+    // باقي الأجزاء
+    else if (part) {
+      const partNum = parseInt(part);
+      chunks[partNum] = data;
+      document.getElementById('status').textContent = `جزء ${partNum} تم استقباله...`;
+      
+      // تحقق إذا استقبلنا جميع الأجزاء
+      let allReceived = true;
+      for (let i = 1; i <= totalChunks; i++) {
+        if (!chunks[i]) {
+          allReceived = false;
+          break;
+        }
       }
-    });
-  } else {
+      
+      if (allReceived) {
+        document.getElementById('status').textContent = "جميع الأجزاء وصلت، جاري التجميع...";
+        setTimeout(processChunks, 1000);
+      }
+    }
+  } catch (e) {
+    console.error('Error:', e);
     reportFail();
   }
 };
+
+function reportDone() {
+  document.getElementById('head').textContent = "Upload Complete! ✓";
+  document.getElementById('status').textContent = "تم رفع التقرير بنجاح إلى GitHub";
+}
+
+function reportFail() {
+  document.getElementById('head').textContent = "Upload Failed! ✗";
+  document.getElementById('status').textContent = "حدث خطأ أثناء رفع التقرير";
+}
 </script>
+
+<!-- مكتبة pako لفك الضغط -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 </body>
 </html>
