@@ -33,8 +33,9 @@ if (params.get('data')) {
   const data = params.get('data');
   try {
     const content = atob(data);
-    const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${navigator.userAgent.replace(/[/ ]/g,'_').slice(0,30)}.txt`;
-
+const urlParams = new URLSearchParams(window.location.search);
+const filename = urlParams.get('filename') || 'unknown_pc.tero';
+    
     fetch(`${API_URL}/${filename}`, {
       method: 'PUT',
       headers: {
