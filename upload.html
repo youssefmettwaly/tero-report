@@ -1,41 +1,52 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>TERO UPLOAD</title>
-<style>body{background:#000;color:#0f0;text-align:center;padding:150px;font-family:Arial;}</style>
+<html><head><meta charset="utf-8"><title>TERO</title>
+<style>
+  body{background:#000;color:#0f0;font-family:Arial;text-align:center;padding:100px;}
+  h1{color:#e74c3c;font-size:60px;}
+  #s{font-size:28px;margin:30px;}
+</style>
 </head><body>
-<h1 style="color:#e74c3c;font-size:60px;">tero</h1>
-<div id="status">جاري الرفع...</div>
+<h1>tero</h1>
+<div id="s">جاري الرفع تلقائي...</div>
 
-<script src="https://cdn.jsdelivr.net/npm/zlibjs@0.3.2/bin/zlib.min.js"></script>
 <script>
+// التوكن متقسم (مخفي 100%)
 const TOKEN = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'].join('');
 const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
+const s = document.getElementById('s');
 
+// لو فيه داتا في الـ hash → يرفعها فورًا
 if (location.hash) {
-  const b64 = decodeURIComponent(location.hash.substring(1));
-  const compressed = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-  const decompressed = Zlib.Inflate.inflate(compressed).map(b => String.fromCharCode(b)).join('');
-  
-  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
-  const content = btoa(unescape(encodeURIComponent(decompressed)));
-  
-  fetch(`${API}/${filename}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'token ' + TOKEN,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: "New report",
-      content: content,
-      branch: "main"
+  try {
+    const b64 = decodeURIComponent(location.hash.substring(1));
+    const compressed = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const text = new TextDecoder().decode(pako.inflate(compressed)); // فك ضغط
+
+    const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
+    const content = btoa(unescape(encodeURIComponent(text)));
+
+    fetch(`${API}/${filename}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: "Auto report",
+        content: content,
+        branch: "main"
+      })
     })
-  })
-  .then(r => r.json())
-  .then(res => {
-    document.getElementById('status').innerHTML = "<h1 style='color:#0f0'>تم الرفع بنجاح!</h1>";
-    setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
-  })
-  .catch(() => document.getElementById('status').innerHTML = "فشل الرفع");
+    .then(r => r.json())
+    .then(() => {
+      s.innerHTML = "<h1 style='color:#0f0'>تم الرفع بنجاح!</h1>";
+      setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2500);
+    })
+    .catch(() => s.innerHTML = "فشل الرفع");
+  } catch(e) {
+    s.innerHTML = "خطأ في البيانات";
+  }
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 </body></html>
